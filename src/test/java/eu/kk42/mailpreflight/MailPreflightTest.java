@@ -1,5 +1,6 @@
 package eu.kk42.mailpreflight;
 
+import eu.kk42.mailpreflight.exception.MailPreflightException;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,5 +18,10 @@ public class MailPreflightTest {
 		//This is just a smoke test to check that no exceptions are thrown in MailPreflight plumbing. Individual processors are tested in separate test classes.
 		String result = preflight.preprocessEmailHtml("<html><body><style>h1 {font-weigth: bold}</style><h1>OUTATIME</h1></body></html>");
 		//log.info(result);
+	}
+
+	@Test
+	public void travisBuild_mustFail_test() {
+		throw new MailPreflightException("Test exception");
 	}
 }
