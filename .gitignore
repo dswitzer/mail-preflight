@@ -1,0 +1,61 @@
+# Gradle
+.gradle/
+build/
+
+# Maven
+target/
+log/
+
+# Misc
+*.log
+*.lock
+*.gz
+.orientdb_history
+npm-debug.log
+testem.log
+/typings
+/classes/
+
+# Eclipse
+.classpath
+.project
+.springBeans
+.settings/
+.metadata/
+.recommenders/
+bin/
+Servers/
+
+# GWT
+gwt-unitCache-*
+
+# Mac OSX
+.DS_Store
+
+# IntelliJIDEA
+.idea/
+*.iml
+
+# Sublime
+*.sublime-workspace
+
+# e2e
+/e2e/*.js
+/e2e/*.map
+
+# Grunt SASS etc.
+.sass-cache/
+node_modules/
+rebel.xml
+rebel-remote.xml
+
+
+out/
+
+\.gradletasknamecache
+
+*.hprof
+
+# System Files
+.DS_Store
+Thumbs.db
