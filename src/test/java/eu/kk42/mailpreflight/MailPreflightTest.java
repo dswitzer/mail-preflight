@@ -19,9 +19,4 @@ public class MailPreflightTest {
 		String result = preflight.preprocessEmailHtml("<html><body><style>h1 {font-weigth: bold}</style><h1>OUTATIME</h1></body></html>");
 		//log.info(result);
 	}
-
-	@Test
-	public void travisBuild_mustFail_test() {
-		throw new MailPreflightException("Test exception");
-	}
 }
