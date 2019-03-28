@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Temporary config.-->
+<Configuration status="warn">
+    <Properties>
+        <Property name="LOG_PATTERN">[%d{yyyy-MM-dd HH:mm:ss.SSS}] %5p [%t] --- %c{1.1.4}: %m%n %ex{full}</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT" follow="false">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <Root level="warn">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>
