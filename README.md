@@ -1,4 +1,4 @@
-# Mail Preflight [![Build Status](https://travis-ci.org/kkonstantin42/mail-preflight.svg?branch=master)](https://travis-ci.org/kkonstantin42/mail-preflight)
+# Mail Preflight [![Build Status](https://travis-ci.org/kkonstantin42/mail-preflight.svg?branch=master)](https://travis-ci.org/kkonstantin42/mail-preflight) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/eu.kk42/mail-preflight/badge.svg)](https://maven-badges.herokuapp.com/maven-central/eu.kk42/mail-preflight)
 
 Mail Preflight is a tool for preprocessing email HTML.
 Currently that includes:
@@ -8,7 +8,7 @@ Currently that includes:
 
 ## State of the project
 __Project is currently in a process of being open sourced.__ It started as a css inliner tool in a different closed source project. 
-Main functionality is tested but there is no documentation, no proper tests and it's __not published to maven central yet__. 
+Main functionality is tested but there is no documentation and no proper tests. 
 Api might also change in the near future.
 
 ## Contributions
@@ -49,20 +49,17 @@ new functionality added.
 
 To start using the library just include it as maven or gradle dependency.
 
-!!!__NOT YET PUBLISHED__!!!
-
-
 Maven dependency:
 
     <dependency>
       <groupId>eu.kk42</groupId>
       <artifactId>mail-preflight</artifactId>
-      <version>0.1</version>
+      <version>0.1.0</version>
     </dependency>  
     
 Gradle dependency:
 
-    implementation 'eu.kk42:mail-preflight:0.1'
+    implementation 'eu.kk42:mail-preflight:0.1.0'
     
 #### How to use it
 
