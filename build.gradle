@@ -50,6 +50,7 @@ publishing {
             pom {
                 name = 'Mail Preflight'
                 description = 'Library for preprocessing emails HTML (css inlining, comments removal etc.)'
+                url = 'https://github.com/kkonstantin42/mail-preflight'
                 licenses {
                     license {
                         name = 'The Apache License, Version 2.0'
