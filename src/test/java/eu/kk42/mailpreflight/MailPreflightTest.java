@@ -1,6 +1,5 @@
 package eu.kk42.mailpreflight;
 
-import eu.kk42.mailpreflight.exception.MailPreflightException;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

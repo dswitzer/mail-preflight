@@ -1,12 +1,14 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
+    id 'signing'
 }
 
 group 'eu.kk42'
 version '1.0-SNAPSHOT'
 
 sourceCompatibility = 1.8
+
 
 repositories {
     mavenCentral()
@@ -44,6 +46,7 @@ task javadocJar(type: Jar) {
 publishing {
     publications {
         mavenJava(MavenPublication) {
+            artifactId = 'mail-preflight'
             from components.java
             artifact sourcesJar
             artifact javadocJar
@@ -71,7 +74,23 @@ publishing {
             }
         }
     }
+    repositories {
+        maven {
+            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials {
+                username = nexusUsername
+                password = nexusPassword
+            }
+        }
+    }
 }
+
+signing {
+    sign publishing.publications.mavenJava
+}
+
 
 wrapper {
     distributionType = Wrapper.DistributionType.ALL
