@@ -281,9 +281,9 @@ public class CssInlinerProcessor implements IPreflightProcessor {
             return vp;
         }
         String[] props = properties.split(";");
-        if(props.length > 1) {
+        if(props.length > 0) {
             for(String p : props) {
-                String[] pcs = p.split(":");
+                String[] pcs = p.split(":", 2);
                 if(pcs.length != 2) {
                     continue;
                 }
