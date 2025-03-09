@@ -1,0 +1,165 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+		 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>eu.kk42</groupId>
+	<artifactId>mail-preflight</artifactId>
+	<version>0.2.1-SNAPSHOT</version>
+	<name>Mail Preflight</name>
+	<description>Library for preprocessing emails HTML (css inlining, comments removal etc.)</description>
+	<url>https://github.com/kkonstantin42/mail-preflight</url>
+
+	<licenses>
+		<license>
+			<name>The Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<id>kk42</id>
+			<name>Konstantin Kastanov</name>
+			<email>konstantin.kastanov@gmail.com</email>
+		</developer>
+	</developers>
+
+	<scm>
+		<connection>scm:git:https://github.com/kkonstantin42/mail-preflight.git</connection>
+		<developerConnection>scm:git:ssh://github.com/kkonstantin42/mail-preflight.git</developerConnection>
+		<url>https://github.com/kkonstantin42/mail-preflight</url>
+	</scm>
+
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+	</properties>
+
+	<dependencies>
+		<!-- Runtime dependencies -->
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>1.19.1</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.cssparser</groupId>
+			<artifactId>cssparser</artifactId>
+			<version>0.9.30</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<!-- TODO: Should use 2.0.17, was: 1.7.36 -->
+			<version>2.0.17</version>
+		</dependency>
+
+		<!-- Test dependencies -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>5.12.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>5.12.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
+			<version>2.24.3</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.24.3</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<!-- Javadoc JAR -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.4.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Source JAR -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.2.1</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Signing -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.6</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Maven Dependency Plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.3.0</version>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/lib</outputDirectory>
+							<includeScope>runtime</includeScope>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+	</build>
+
+	<distributionManagement>
+		<repository>
+			<id>releases</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+		</repository>
+		<snapshotRepository>
+			<id>snapshots</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
+</project>

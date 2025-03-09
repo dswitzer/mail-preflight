@@ -2,7 +2,6 @@ package eu.kk42.mailpreflight.processors;
 
 import com.steadystate.css.parser.CSSOMParser;
 import com.steadystate.css.parser.SACParserCSS3;
-import eu.kk42.mailpreflight.MailPreflight;
 import eu.kk42.mailpreflight.domain.CssSpecificity;
 import eu.kk42.mailpreflight.domain.CssValueWithSpecificity;
 import eu.kk42.mailpreflight.domain.IPreflightProcessor;

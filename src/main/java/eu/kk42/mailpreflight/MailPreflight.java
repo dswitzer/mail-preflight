@@ -6,8 +6,8 @@ import eu.kk42.mailpreflight.processors.CssInlinerProcessor;
 import eu.kk42.mailpreflight.processors.HtmlCommentsRemovalProcessor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+// import org.slf4j.Logger;
+// import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,7 +18,7 @@ import java.util.List;
  * created on 2019-03-18
  */
 public class MailPreflight {
-	private static final Logger log = LoggerFactory.getLogger(MailPreflight.class);
+	// private static final Logger log = LoggerFactory.getLogger(MailPreflight.class);
 
 
 	private final List<IPreflightProcessor> processors;
