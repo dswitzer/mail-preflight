@@ -4,6 +4,8 @@ import eu.kk42.mailpreflight.domain.IPreflightProcessor;
 import eu.kk42.mailpreflight.domain.PreflightConfig;
 import eu.kk42.mailpreflight.processors.CssInlinerProcessor;
 import eu.kk42.mailpreflight.processors.HtmlCommentsRemovalProcessor;
+import eu.kk42.mailpreflight.processors.HtmlCssRemovalProcessor;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 // import org.slf4j.Logger;
@@ -26,20 +28,40 @@ public class MailPreflight {
 	public MailPreflight() {
 		processors = Arrays.asList(
 				new CssInlinerProcessor(),
-				new HtmlCommentsRemovalProcessor()
+				new HtmlCommentsRemovalProcessor(),
+				new HtmlCssRemovalProcessor()
 		);
 	}
 
+	// allow custom processors to be added
+	public MailPreflight withProcessor(IPreflightProcessor processor) {
+		processors.add(processor);
+
+		return this;
+	}
+
+	public PreflightConfig createConfig() {
+		return new PreflightConfig();
+	}
+
 	public String preprocessEmailHtml(String html) {
-		return this.preprocessEmailHtml(html, new PreflightConfig());
+		return this.preprocessEmailHtml(html, this.createConfig());
+	}
+
+	public String preprocessEmailHtml(PreflightConfig config, String html) {
+		return this.preprocessEmailHtml(config, html);
 	}
 
 	public String preprocessEmailHtml(String html, PreflightConfig config) {
 		Document document = Jsoup.parse(html);
 
+		// apply the processors
 		for (IPreflightProcessor processor : processors) {
 			processor.process(document, config);
 		}
+
+		// apply the jSoup output settings which have been configured
+		config.applyOutputSettings(document);
 
 		return document.html();
 	}
