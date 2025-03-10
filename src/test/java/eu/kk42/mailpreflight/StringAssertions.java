@@ -13,7 +13,7 @@ public class StringAssertions {
 
 	public static void assertStringsEqualWithDiffHighlight(String expected, String actual) {
 		// default to 20 character radius
-		assertStringsEqualWithDiffHighlight(expected, actual, 20);
+		assertStringsEqualWithDiffHighlight(expected, actual, 32);
 	}
 
 	public static void assertStringsEqualWithDiffHighlight(String expected, String actual, int contextRadius) {
@@ -31,12 +31,12 @@ public class StringAssertions {
 			String markerDistance = " ".repeat(offset);
 
 			String diffMessage = String.format(
-				"Strings differ:\n" +
+				"Strings differ @ %s:\n" +
 				"Expected context:  %s\n" + 
 				"%s^-- difference starts here\n" +
 				"Actual context:    %s\n" +
 				""
-				, expectedContext, markerDistance, actualContext
+				, diffIndex, expectedContext, markerDistance, actualContext
 			);
 
 			fail(diffMessage);

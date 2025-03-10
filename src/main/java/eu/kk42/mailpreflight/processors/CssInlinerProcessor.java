@@ -1,5 +1,12 @@
 package eu.kk42.mailpreflight.processors;
 
+import com.steadystate.css.dom.CSSRuleListImpl;
+import com.steadystate.css.dom.CSSStyleDeclarationImpl;
+import com.steadystate.css.dom.CSSStyleRuleImpl;
+import com.steadystate.css.dom.CSSStyleSheetImpl;
+import com.steadystate.css.dom.CSSValueImpl;
+import com.steadystate.css.dom.RGBColorImpl;
+import com.steadystate.css.format.CSSFormat;
 import com.steadystate.css.parser.CSSOMParser;
 import com.steadystate.css.parser.SACParserCSS3;
 import eu.kk42.mailpreflight.domain.CssSpecificity;
@@ -25,16 +32,17 @@ import org.w3c.css.sac.Selector;
 import org.w3c.css.sac.SelectorList;
 import org.w3c.css.sac.SiblingSelector;
 import org.w3c.dom.css.CSSRule;
-import org.w3c.dom.css.CSSRuleList;
-import org.w3c.dom.css.CSSStyleDeclaration;
 import org.w3c.dom.css.CSSStyleRule;
-import org.w3c.dom.css.CSSStyleSheet;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -68,8 +76,11 @@ public class CssInlinerProcessor implements IPreflightProcessor {
         }
 
         List<InputSource> cssSources = this.extractCssElements(document);
+        Set<String> elementsThatSupportBgColorAttr = new HashSet<>(Arrays.asList("body", "table", "tr", "th", "td"));
 
         CSSOMParser parser = getParser(); //Is this thread safe?
+        // get the formatter to use when getting the CSS information
+        CSSFormat formatter = config.getCssFormatter();
 
         if(cssSources.isEmpty()) {
             log.warn("Could not find any css style blocks in the html, css inlining won't be used.");
@@ -79,15 +90,16 @@ public class CssInlinerProcessor implements IPreflightProcessor {
         Map<Element, Map<String, CssValueWithSpecificity>> allElementsStyles = new HashMap<>();
 
         for(InputSource cssSource : cssSources) {
-            CSSStyleSheet stylesheet = null;
+            CSSStyleSheetImpl stylesheet = null;
 
             try {
-                stylesheet = parser.parseStyleSheet(cssSource, null, null);
+                stylesheet = (CSSStyleSheetImpl) parser.parseStyleSheet(cssSource, null, null);
             } catch(IOException ex) {
                 throw new MailPreflightException("Failed to parse css", ex);
             }
+            
+            CSSRuleListImpl ruleList = (CSSRuleListImpl) stylesheet.getCssRules();
 
-            CSSRuleList ruleList = stylesheet.getCssRules();
 
             if(log.isDebugEnabled()) {
                 log.debug("Found {} css rules", ruleList.getLength());
@@ -97,7 +109,7 @@ public class CssInlinerProcessor implements IPreflightProcessor {
                 CSSRule item = ruleList.item(ruleIndex);
 
                 if(item instanceof CSSStyleRule) {
-                    CSSStyleRule styleRule = (CSSStyleRule) item;
+                    CSSStyleRuleImpl styleRule = (CSSStyleRuleImpl) item;
                     String cssSelector = styleRule.getSelectorText();
 
                     SelectorList cssSelectors;
@@ -111,7 +123,7 @@ public class CssInlinerProcessor implements IPreflightProcessor {
                     for(int selectorIndex = 0; selectorIndex < cssSelectors.getLength(); selectorIndex++) {
                         Selector selector = cssSelectors.item(selectorIndex);
                         Elements elements = document.select(selector.toString());
-                        CSSStyleDeclaration style = styleRule.getStyle();
+                        CSSStyleDeclarationImpl style = (CSSStyleDeclarationImpl) styleRule.getStyle();
 
                         if(log.isTraceEnabled()) {
                             log.trace("Found {} elements for css selector {}", elements.size(), cssSelector);
@@ -124,7 +136,15 @@ public class CssInlinerProcessor implements IPreflightProcessor {
 
                             for(int propertyIndex = 0; propertyIndex < style.getLength(); propertyIndex++) {
                                 String propertyName = style.item(propertyIndex);
-                                String propertyValue = style.getPropertyValue(propertyName);
+                                /*
+                                 * In order to apply our formatting rules, we must get the CSSValue implementation
+                                 * so we can apply our formatting options.
+                                 * 
+                                 * If we want the parsed value (which is what the original code used), we could use:
+                                 * 
+                                 * String propertyValue = style.getPropertyValue(propertyName);
+                                 */
+                                String propertyValue = ((CSSValueImpl) style.getPropertyCSSValue(propertyName)).getCssText(formatter);
 
                                 CssValueWithSpecificity CssValueWithSpecificity = new CssValueWithSpecificity(propertyValue,
                                         calculatePropertySpecificity(selector, styleRule, propertyName));
@@ -143,6 +163,7 @@ public class CssInlinerProcessor implements IPreflightProcessor {
             for(Map.Entry<String, CssValueWithSpecificity> styleEntry : elementEntry.getValue().entrySet()) {
                 String propertyName = styleEntry.getKey();
                 String propertyValue = styleEntry.getValue().getValue(); //TODO: add !important if necessary
+
                 if(propertyName.startsWith(AUGMENTED_CSS_PREFIX)) {
                     if(config.isUseAugmentedCss()) {
                         String attributeName = propertyName.substring(AUGMENTED_CSS_PREFIX.length());
@@ -155,9 +176,71 @@ public class CssInlinerProcessor implements IPreflightProcessor {
                 }
             }
             element.attr(STYLE, builder.toString());
+
+            /*
+             * For tags that support the "bgcolor" attribute, we might need to add the attribute
+             * to the element.
+             */
+            if( config.isTargetLegacyClients() && elementsThatSupportBgColorAttr.contains(element.tagName().toLowerCase()) ){
+                String bgColor = extractHexColorFromInlineStyles(element.attr(STYLE));
+
+                // when we detected a color, we add the color attribute
+                if( (bgColor != null) && (bgColor.length() > 0 ) ){
+                    element.attr("bgcolor", bgColor);
+                }
+            }
+
         }
 
     }
+
+    //This method is mainly intended for testing. use calculateSelectorSpecificity(Selector) for internal use.
+    public String extractHexColorFromInlineStyles(String styles) {
+        CSSStyleDeclarationImpl cssStyles = new CSSStyleDeclarationImpl();
+        cssStyles.setCssText(styles);
+
+        // we need to force bgcolors to hex
+        CSSFormat formatter = new CSSFormat().setRgbAsHex(true);
+
+        Set<String> bgProperties = new HashSet<String>(Arrays.asList("background-color", "background"));
+
+        for( String property : bgProperties ){
+            CSSValueImpl value = (CSSValueImpl) cssStyles.getPropertyCSSValue(property);
+            Object lexValue = null;
+
+            if( value != null ){
+                lexValue = (Object) value.getValue();
+                // lexValue = (Object) value.getRGBColorValue();
+
+                // some CSS properties (like background) might return many values, so we need to find the color
+                if( lexValue instanceof ArrayList<?>){
+                    lexValue = findRGBColorImpl((ArrayList<?>) lexValue);
+                }
+            }
+
+            if( lexValue instanceof RGBColorImpl ){
+                return ((RGBColorImpl) lexValue).getCssText(formatter);
+            }
+        }
+
+        // we could find no color
+        return null;
+    }
+
+    public RGBColorImpl findRGBColorImpl(ArrayList<?> values) {
+        for( Object item : (ArrayList<?>) values ){
+            if( item instanceof CSSValueImpl ){
+                CSSValueImpl itemValue = (CSSValueImpl) item;
+                if( itemValue.getPrimitiveType() ==  CSSValueImpl.CSS_RGBCOLOR ){
+                    return (RGBColorImpl) itemValue.getRGBColorValue();
+                }
+            }
+        }
+
+        // if we cannot find a match, return null
+        return (RGBColorImpl) null;
+    }
+
 
     //This method is mainly intended for testing. use calculateSelectorSpecificity(Selector) for internal use.
     public CssSpecificity calculateSelectorSpecificity(String selector) {

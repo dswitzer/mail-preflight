@@ -3,6 +3,8 @@ package eu.kk42.mailpreflight.domain;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Document.OutputSettings;
 
+import com.steadystate.css.format.CSSFormat;
+
 /**
  * @author konstantinkastanov
  * created on 2019-03-28
@@ -12,8 +14,13 @@ public class PreflightConfig {
 	private boolean useAugmentedCss = true;
 	private boolean removeHtmlComments = true;
 	private boolean removeCssClasses = false;
+	// for Jsoup processing
 	private Boolean prettyPrint;
 	private OutputSettings outputSettings;
+	// for CSSOMParser processing
+	private boolean targetLegacyClients = true;
+	private Boolean useHexColors;
+	private CSSFormat cssFormatter;
 
 	public boolean isInlineCss() {
 		return inlineCss;
@@ -51,6 +58,7 @@ public class PreflightConfig {
 		return this;
 	}
 
+	// for Jsoup processing
 	public boolean hasPrettyPrint() {
 		return (this.prettyPrint == null) ? false : true;
 	}
@@ -84,5 +92,66 @@ public class PreflightConfig {
 		}
 	
 		return this;
+	}
+
+	// for CSSOMParser processing
+	public boolean isTargetLegacyClients() {
+		return this.targetLegacyClients;
+	}
+
+	public PreflightConfig withTargetLegacyClients(boolean targetLegacyClients) {
+		this.targetLegacyClients = targetLegacyClients;
+
+		/*
+		 * When targeting legacy clients, we need to use hex colors.
+		 * 
+		 * If we have not specifically defined a whether or not we want to use
+		 * hex colors, then we should mirror the setting to the hex colors because
+		 * the two options are tightly coupled.
+		 */
+
+		// when targeting legacy clients, we need to use hex colors (but we should mirror the setting when not d)
+		if( this.targetLegacyClients || !hasUseHexColors() ){
+			this.useHexColors = this.targetLegacyClients;
+		}
+		
+		return this;
+	}
+
+	public boolean hasUseHexColors() {
+		return (this.useHexColors == null) ? false : true;
+	}
+
+	public boolean isUseHexColors() {
+		return hasUseHexColors() ? this.useHexColors : true;
+	}
+
+	public PreflightConfig withUseHexColors(boolean useHexColors) {
+		this.useHexColors = useHexColors;
+		return this;
+	}
+
+	public boolean hasCssFormatter() {
+		return (this.cssFormatter instanceof CSSFormat) ? true : false;
+	}
+
+	public PreflightConfig withCssFormatter(CSSFormat cssFormatter) {
+		this.cssFormatter = cssFormatter;
+		return this;
+	}
+
+	public CSSFormat getCssFormatter() {
+		CSSFormat formatter = hasCssFormatter() ? this.cssFormatter : new CSSFormat();
+
+		/*
+		 * We want to apply our hex setting whenever explicitly set
+		 * or if the user has not supplied a formatter, we apply the
+		 * default formatting rule.
+		 */
+		if( !hasCssFormatter() || hasUseHexColors() ){
+			formatter.setRgbAsHex(isUseHexColors());
+		}
+	
+		return formatter;
 	}
 }
