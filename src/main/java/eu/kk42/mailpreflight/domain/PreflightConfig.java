@@ -12,6 +12,7 @@ import com.steadystate.css.format.CSSFormat;
 public class PreflightConfig {
 	private boolean inlineCss = true;
 	private boolean useAugmentedCss = true;
+	private String augmentedCssPrefix = "-mailpreflight-";
 	private boolean removeHtmlComments = true;
 	private boolean removeCssClasses = false;
 	// for Jsoup processing
@@ -37,6 +38,15 @@ public class PreflightConfig {
 
 	public PreflightConfig withAugmentedCss(boolean useAugmentedCss) {
 		this.useAugmentedCss = useAugmentedCss;
+		return this;
+	}
+
+	public String getAugmentedCssPrefix() {
+		return augmentedCssPrefix;
+	}
+
+	public PreflightConfig withAugmentedCssPrefix(String augmentedCssPrefix) {
+		this.augmentedCssPrefix = augmentedCssPrefix;
 		return this;
 	}
 

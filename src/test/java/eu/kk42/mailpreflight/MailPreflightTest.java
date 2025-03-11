@@ -170,6 +170,47 @@ public class MailPreflightTest {
 	}
 
 	@Test
+	public void preprocessEmailHtml_should_process_as_xhtml() {
+		String templatePath = "templates/postmark/basic/example/content.html";
+		String expectedPath = "assertions/templates/postmark/basic/example_default_as_xhtml.html";
+
+		String template = StringAssertions.readFile(templatePath);
+		PreflightConfig config = preflight.createConfig();
+
+		// create custom output settings for jSoup
+		OutputSettings settings = new OutputSettings();
+		settings
+			.escapeMode(EscapeMode.xhtml)
+			.syntax(Syntax.xml)
+		;
+		// update the configuration
+		config.withOutputSettings(settings);
+	
+		String expected = StringAssertions.readFile(expectedPath);
+		String actual = preflight.preprocessEmailHtml(template, config);
+
+		StringAssertions.saveFile("target/test-output/", "preprocessEmailHtml_test_actual.html", actual);		
+
+		assertStringsEqualWithDiffHighlight(expected, actual);
+	}
+
+	@Test
+	public void preprocessEmailHtml_should_process_with_custom_augmentedCssPrefix() {
+		String templatePath = "templates/postmark/basic/example/content.html";
+		String expectedPath = "assertions/templates/postmark/basic/example_default_augmentedCssPrefix.html";
+
+		String template = StringAssertions.readFile(templatePath);
+		PreflightConfig config = preflight.createConfig()
+			.withAugmentedCssPrefix("-premailer-")
+		;
+	
+		String expected = StringAssertions.readFile(expectedPath);
+		String actual = preflight.preprocessEmailHtml(template, config);
+
+		assertStringsEqualWithDiffHighlight(expected, actual);
+	}
+
+	@Test
 	public void preprocessEmailHtml_should_process_basic_example_without_targeting_legacy_clients() {
 		String templatePath = "templates/postmark/basic/example/content.html";
 		String expectedPath = "assertions/templates/postmark/basic/example_default_without_legacy_formatting.html";
@@ -255,4 +296,5 @@ public class MailPreflightTest {
 
 		assertStringsEqualWithDiffHighlight(expected, actual);
 	}
+
 }

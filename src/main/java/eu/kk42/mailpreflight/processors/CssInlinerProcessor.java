@@ -64,8 +64,6 @@ public class CssInlinerProcessor implements IPreflightProcessor {
     private static final Map<String, CssSpecificity> SPECIFICITY_CACHE = new ConcurrentHashMap<>();
 
 
-    private static final String AUGMENTED_CSS_PREFIX = "-mailpreflight-";
-
     @Override
     public void process(Document document, PreflightConfig config) {
 
@@ -157,6 +155,7 @@ public class CssInlinerProcessor implements IPreflightProcessor {
             }
         }
 
+        final String AUGMENTED_CSS_PREFIX = config.getAugmentedCssPrefix();
 
         for(Map.Entry<Element, Map<String, CssValueWithSpecificity>> elementEntry : allElementsStyles.entrySet()) {
             Element element = elementEntry.getKey();
