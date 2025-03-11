@@ -3,15 +3,14 @@ package eu.kk42.mailpreflight;
 import org.junit.jupiter.api.Test;
 
 import eu.kk42.mailpreflight.domain.PreflightConfig;
-import eu.kk42.mailpreflight.domain.utils.W3CNamedColor;
 
 import org.jsoup.nodes.Document.OutputSettings;
 import org.jsoup.nodes.Document.OutputSettings.Syntax;
 import org.jsoup.nodes.Entities.EscapeMode;
 import static org.junit.jupiter.api.Assertions.*;
 import static eu.kk42.mailpreflight.StringAssertions.assertStringsEqualWithDiffHighlight;
-// import org.slf4j.Logger;
-// import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -19,7 +18,7 @@ import static eu.kk42.mailpreflight.StringAssertions.assertStringsEqualWithDiffH
  * created on 2019-03-29
  */
 public class MailPreflightTest {
-	// private static final Logger log = LoggerFactory.getLogger(MailPreflightTest.class);
+	private static final Logger log = LoggerFactory.getLogger(MailPreflightTest.class);
 	private MailPreflight preflight = new MailPreflight();
 
 
@@ -29,7 +28,7 @@ public class MailPreflightTest {
 
 		// This is just a smoke test to check that no exceptions are thrown in MailPreflight plumbing. Individual processors are tested in separate test classes.
 		String result = preflight.preprocessEmailHtml(html);
-		//log.info(result);
+		// log.info(result);
 		// System.out.println(result);
 		assertTrue(result.length() > 0);
 	}
