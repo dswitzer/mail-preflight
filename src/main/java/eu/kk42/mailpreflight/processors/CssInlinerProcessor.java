@@ -13,6 +13,7 @@ import eu.kk42.mailpreflight.domain.CssSpecificity;
 import eu.kk42.mailpreflight.domain.CssValueWithSpecificity;
 import eu.kk42.mailpreflight.domain.IPreflightProcessor;
 import eu.kk42.mailpreflight.domain.PreflightConfig;
+import eu.kk42.mailpreflight.domain.utils.W3CNamedColor;
 import eu.kk42.mailpreflight.exception.MailPreflightException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -202,24 +203,15 @@ public class CssInlinerProcessor implements IPreflightProcessor {
         // we need to force bgcolors to hex
         CSSFormat formatter = new CSSFormat().setRgbAsHex(true);
 
+        // we want to search in order CSS would place precedence
         Set<String> bgProperties = new HashSet<String>(Arrays.asList("background-color", "background"));
 
         for( String property : bgProperties ){
             CSSValueImpl value = (CSSValueImpl) cssStyles.getPropertyCSSValue(property);
-            Object lexValue = null;
+            RGBColorImpl rgbValue = findRGBColorImpl(value);
 
-            if( value != null ){
-                lexValue = (Object) value.getValue();
-                // lexValue = (Object) value.getRGBColorValue();
-
-                // some CSS properties (like background) might return many values, so we need to find the color
-                if( lexValue instanceof ArrayList<?>){
-                    lexValue = findRGBColorImpl((ArrayList<?>) lexValue);
-                }
-            }
-
-            if( lexValue instanceof RGBColorImpl ){
-                return ((RGBColorImpl) lexValue).getCssText(formatter);
+            if( rgbValue instanceof RGBColorImpl ){
+                return rgbValue.getCssText(formatter);
             }
         }
 
@@ -227,12 +219,52 @@ public class CssInlinerProcessor implements IPreflightProcessor {
         return null;
     }
 
+    public RGBColorImpl createRGBColorImpl(String hex) {
+        // when we have a "named" color, convert it to hex
+        if( W3CNamedColor.isNamedColor(hex) ){
+            hex = W3CNamedColor.getNamedColor(hex).asHex();
+        }
+
+        // we need to create our CSSValue so we can get the RGBColor instance
+        CSSValueImpl color = new CSSValueImpl();
+        color.setCssText(hex);
+
+        return (RGBColorImpl) color.getRGBColorValue();
+    }
+
+    public RGBColorImpl findRGBColorImpl(CSSValueImpl value) {
+        // if our value is null, there is nothing to find
+        if( value == null ) return null;
+
+        Object lexValue = (Object) value.getValue();
+
+        // some CSS properties (like background) might return many values, so we need to find the color
+        if( lexValue instanceof ArrayList<?>){
+            lexValue = findRGBColorImpl((ArrayList<?>) lexValue);
+        }
+
+        if( lexValue instanceof RGBColorImpl ){
+            return (RGBColorImpl) lexValue;
+
+        // check if we have a "named" color (aliceblue, rebeccapurple, white, black, etc)
+        } else if( W3CNamedColor.isNamedColor(((CSSValueImpl)lexValue).getCssText()) ){
+            return createRGBColorImpl(((CSSValueImpl)lexValue).getCssText());
+        }
+
+        return null;
+    }
+
     public RGBColorImpl findRGBColorImpl(ArrayList<?> values) {
         for( Object item : (ArrayList<?>) values ){
             if( item instanceof CSSValueImpl ){
                 CSSValueImpl itemValue = (CSSValueImpl) item;
+
                 if( itemValue.getPrimitiveType() ==  CSSValueImpl.CSS_RGBCOLOR ){
                     return (RGBColorImpl) itemValue.getRGBColorValue();
+
+                // check if we have a "named" color (aliceblue, rebeccapurple, white, black, etc)
+                } else if( W3CNamedColor.isNamedColor(itemValue.getCssText()) ){
+                    return createRGBColorImpl(itemValue.getCssText());
                 }
             }
         }

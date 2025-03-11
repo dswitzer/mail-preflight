@@ -3,6 +3,8 @@ package eu.kk42.mailpreflight;
 import org.junit.jupiter.api.Test;
 
 import eu.kk42.mailpreflight.domain.PreflightConfig;
+import eu.kk42.mailpreflight.domain.utils.W3CNamedColor;
+
 import org.jsoup.nodes.Document.OutputSettings;
 import org.jsoup.nodes.Document.OutputSettings.Syntax;
 import org.jsoup.nodes.Entities.EscapeMode;
@@ -83,22 +85,22 @@ public class MailPreflightTest {
 		assertStringsEqualWithDiffHighlight(expected, actual);
 	}
 
-	// @Test
-	// public void preprocessEmailHtml_should_target_legacy_browsers_by_default_and_extract_bgcolor_from_background_as_named_color() {
-	// 	String html = "<html><body><style>body {background: border-box white} h1 {font-weight: bold; color: #0000ff}</style><h1>Hello World</h1></body></html>";
+	@Test
+	public void preprocessEmailHtml_should_extract_bgcolor_from_background_as_named_color() {
+		String html = "<html><body><style>body {background: border-box white} h1 {font-weight: bold; color: blue}</style><h1>Hello World</h1></body></html>";
 
-	// 	String expected = "<html>\n" +
-	// 		" <head></head>\n" +
-	// 		" <body style=\"background:border-box white;\" bgcolor=\"white\">\n" +
-	// 		"  <style>body {background: border-box white} h1 {font-weight: bold; color: #0000ff}</style>\n" +
-	// 		"  <h1 style=\"color:#0000ff;font-weight:bold;\">Hello World</h1>\n" +
-	// 		" </body>\n" +
-	// 		"</html>"
-	// 	;
-	// 	String actual = preflight.preprocessEmailHtml(html);
+		String expected = "<html>\n" +
+			" <head></head>\n" +
+			" <body style=\"background:border-box white;\" bgcolor=\"#ffffff\">\n" +
+			"  <style>body {background: border-box white} h1 {font-weight: bold; color: blue}</style>\n" +
+			"  <h1 style=\"color:blue;font-weight:bold;\">Hello World</h1>\n" +
+			" </body>\n" +
+			"</html>"
+		;
+		String actual = preflight.preprocessEmailHtml(html);
 
-	// 	assertStringsEqualWithDiffHighlight(expected, actual);
-	// }
+		assertStringsEqualWithDiffHighlight(expected, actual);
+	}
 
 	@Test
 	public void preprocessEmailHtml_should_target_legacy_browsers_by_default_and_extract_bgcolor_from_background_color() {
